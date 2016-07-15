@@ -13,3 +13,29 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.inline-item{
+    display: inline;
+}
+
+.yelp-name-text{
+    display: inline;
+    margin-left: 10px;
+vertical-align: middle;
+}
+
+.yelp-main-img{
+    width: 100px;
+    height: 100px;
+}
+
+.yelp-rating{
+    vertical-align: middle;
+    margin-left: 1em;
+    margin-top:  .4em;
+}
+
+.going-button{
+    vertical-align: middle;
+    margin-left: 1em;
+}

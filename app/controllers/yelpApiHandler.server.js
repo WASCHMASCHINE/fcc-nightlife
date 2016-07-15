@@ -14,12 +14,10 @@ function YelpApiHandler(){
     
     this.searchForBars = function(req, res){
         var location = req.query['location'];
-        console.log("we're in the handler");
         yelp.search({   term: 'bars',
                         limit: 15,
                         location: location })
         .then(function (data) {
-          console.log(data);
           res.json(data);
         })
         .catch(function (err) {
