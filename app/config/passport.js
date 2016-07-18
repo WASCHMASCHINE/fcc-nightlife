@@ -1,47 +1,51 @@
 'use strict';
+var TwitterStrategy = require('passport-twitter').Strategy;
+var mongo = require('mongodb').MongoClient;
 
-module.exports = function (passport) {
-	passport.serializeUser(function (user, done) {
-		done(null, user.id);
-	});
-
-	passport.deserializeUser(function (id, done) {
-		done(null, id);
-	});
-/*
-	passport.use(new GitHubStrategy({
-		clientID: configAuth.githubAuth.clientID,
-		clientSecret: configAuth.githubAuth.clientSecret,
-		callbackURL: configAuth.githubAuth.callbackURL
-	},
-	function (token, refreshToken, profile, done) {
-		process.nextTick(function () {
-			User.findOne({ 'github.id': profile.id }, function (err, user) {
-				if (err) {
-					return done(err);
-				}
-
-				if (user) {
-					return done(null, user);
-				} else {
-					var newUser = new User();
-
-					newUser.github.id = profile.id;
-					newUser.github.username = profile.username;
-					newUser.github.displayName = profile.displayName;
-					newUser.github.publicRepos = profile._json.public_repos;
-					newUser.nbrClicks.clicks = 0;
-
-					newUser.save(function (err) {
-						if (err) {
-							throw err;
-						}
-
-						return done(null, newUser);
-					});
-				}
-			});
-		});
-	}));
-	*/
+module.exports = function(passport){
+    passport.serializeUser(function(user, done){
+        done(null, user);
+    });
+    
+    passport.deserializeUser(function(id, done){
+        mongo.connect(process.env.MONGO_URI, function(err, db) {
+            if (err) { return done(err); }
+            var col = db.collection('polls-user');
+            col.find({'userId': id}).toArray(function(err, user){
+                if (err){ return done(err); }
+                return done(null, user);
+            });
+        });
+    });
+    
+    passport.use(new TwitterStrategy({
+            consumerKey: process.env.TWITTER_CONSUMER_KEY,
+            consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+            callbackURL: process.env.APP_URL + "auth/twitter/callback"
+        },
+        function(token, tokenSecret, profile, done){
+            process.nextTick(function(){
+                
+                mongo.connect(process.env.MONGO_URI, function(err, db) {
+                    if (err) { return done(err); }
+                    var col = db.collection('nightlife-user');
+                    col.findOne({'userId': profile.id}, function(err, result) {
+        				if (err) { return done(err); }
+        				
+        				if (result){
+        				    return done(null, result);    
+        				} else {
+        				    var newEntry = {'userId': profile.id, 'displayName': profile.displayName};
+                            col.insert(newEntry, function(err,data){
+                    			if (err) throw err;
+                    			db.close();
+                    			done(null, newEntry);
+                            });
+        				}
+                    });
+    	        });
+            });
+            
+        }
+    ));
 };
