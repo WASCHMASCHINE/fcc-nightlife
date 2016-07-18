@@ -23,18 +23,18 @@ function CheckinHandler(){
                             db.collection('nightlife-bars').update(
 					            {"yelpId": barId, "goingGuests": userId},
 					            {$pull: {'goingGuests': userId}});
-					        res.send("exists, removed user");
+					        res.redirect(req.session.returnTo);
                         } else { // did not found user a a guest
                             db.collection('nightlife-bars').update(
 					            {"yelpId": barId},
 					            {$push: {'goingGuests': userId}});
-					        res.send("exists, added user");
+					        res.redirect(req.session.returnTo);
                         }
 					    
 					} else { // bar does not exist in db
 					    db.collection('nightlife-bars').insert(
 					        { "yelpId": barId, "goingGuests": [userId]});
-                        res.send("added bar + user");
+                        res.redirect(req.session.returnTo);
 					}
 				}
 			);

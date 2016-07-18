@@ -9,10 +9,10 @@ var checkinHandler = new checkinHandlerFunctions();
 module.exports = function (app, passport) {
 
 	function isLoggedIn (req, res, next) {
+		req.session.returnTo = "/?location="+ encodeURIComponent(req.query.location);
 		if (req.isAuthenticated()) {
 			return next();
 		} else {
-    		req.session.returnTo = "/?location="+ encodeURIComponent(req.query.location);
 			res.redirect('/login');
 		}
 	}
